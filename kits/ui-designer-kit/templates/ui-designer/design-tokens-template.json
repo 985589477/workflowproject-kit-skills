@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "name": "项目设计令牌",
+    "status": "draft",
+    "sourceOfTruth": true,
+    "targetPlatforms": [],
+    "notes": "这是平台中立模板。确认目标平台后，再生成对应平台适配文件。"
+  },
+  "primitives": {
+    "color": {
+      "neutral.0": "#FFFFFF",
+      "neutral.50": "#F7F8FA",
+      "neutral.900": "#1F2329",
+      "brand.500": "#3370FF",
+      "red.500": "#F04438",
+      "green.500": "#12B76A",
+      "yellow.500": "#F79009"
+    },
+    "fontFamily": {
+      "sans": "system-ui, sans-serif",
+      "mono": "ui-monospace, monospace"
+    },
+    "fontSize": {
+      "body.md": "14px",
+      "body.lg": "16px",
+      "heading.md": "20px"
+    },
+    "fontWeight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600
+    },
+    "spacing": {
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "6": "24px"
+    },
+    "radius": {
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px"
+    }
+  },
+  "semantic": {
+    "color": {
+      "background.canvas": "{primitives.color.neutral.50}",
+      "background.surface": "{primitives.color.neutral.0}",
+      "text.primary": "{primitives.color.neutral.900}",
+      "action.primary": "{primitives.color.brand.500}",
+      "status.error": "{primitives.color.red.500}",
+      "status.success": "{primitives.color.green.500}",
+      "status.warning": "{primitives.color.yellow.500}"
+    },
+    "typography": {
+      "body.md": {
+        "fontFamily": "{primitives.fontFamily.sans}",
+        "fontSize": "{primitives.fontSize.body.md}",
+        "fontWeight": "{primitives.fontWeight.regular}",
+        "lineHeight": 1.57
+      }
+    },
+    "spacing": {
+      "component.gap": "{primitives.spacing.2}",
+      "section.gap": "{primitives.spacing.6}"
+    }
+  },
+  "components": {
+    "calendar": {
+      "day.default": "{semantic.color.text.primary}",
+      "day.selected": "{semantic.color.action.primary}",
+      "day.disabled": "{semantic.color.text.secondary}",
+      "day.error": "{semantic.color.status.error}",
+      "cell.size": "44px",
+      "stateNotes": "根据目标平台补充悬停、聚焦、范围选中、键盘和触控规则。"
+    }
+  }
+}
