@@ -183,6 +183,22 @@ if [ -n "$PROJECT" ]; then
   log ""
 fi
 
+# 装完后主动提示：其它技能根里若有**同名实体目录**，会造成同名冲突
+if [ "$UNINSTALL" != "1" ]; then
+  STALE=""
+  for other in "$CODEX_ROOT" "$CURSOR_ROOT" "$DSH_ROOT" "$HOME/.agents/skills"; do
+    [ -n "$other" ] || continue
+    case " ${targets[*]:-} " in *" $other "*) continue ;; esac
+    [ -e "$other/$KIT_NAME" ] && [ ! -L "$other/$KIT_NAME" ] && STALE="$STALE\n    $other/$KIT_NAME"
+  done
+  if [ -n "$STALE" ]; then
+    log "⚠️  发现其它技能根里有同名实体目录（会造成同名冲突，谁生效不确定）："
+    printf '%b\n' "$STALE"
+    log "    建议改名备份（不删）：mv <上面路径> <上面路径>.backup-\$(date +%Y%m%d)"
+    log ""
+  fi
+fi
+
 if [ "$UNINSTALL" != "1" ]; then
   log "完成。验证："
   log "  # 看链接是否建好"
@@ -193,4 +209,6 @@ if [ "$UNINSTALL" != "1" ]; then
   log "  · DSH 只扫一层 skills/*/SKILL.md，所以 6 个能力包必须各有一个条目（本脚本已建）。"
   log "  · Cursor 递归扫描，即使只装主 skill 也能发现嵌套的 6 个；但显式条目更清晰。"
   log "  · 符号链接模式下，改仓库 = 改已安装的 skill，不会漂移。"
+  log "  · 默认只装 ~/.codex/skills 一处就够（DSH / Codex / Cursor 三家都读它）。"
+  log "    不要用 --all：那会让 DSH 和 Cursor 各自看到同一个 skill 两次。"
 fi

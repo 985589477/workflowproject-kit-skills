@@ -59,12 +59,14 @@ done
 
 echo
 if [ "$conflicts" -gt 0 ]; then
-  echo "⚠️  $conflicts 个 skill 出现在多个根里 —— 谁生效不确定，建议只留一处："
-  echo "      在你想保留的那个根留链接，另一处改名备份（.backup-日期）"
-  echo "      一条命令搞定：./scripts/install.sh --all --replace"
+  echo "⚠️  $conflicts 个 skill 出现在多个根里 —— 谁生效不确定，建议只留一处。"
+  echo "      推荐：只留 ~/.codex/skills 那一处 —— DSH、Codex、Cursor 三家都读它，"
+  echo "            它一处就够；--all 反而会让 DSH/Cursor 各看到同一 skill 两次。"
+  echo "      清理：./scripts/install.sh            # 装到 ~/.codex/skills（默认）"
+  echo "            然后把其它根里的同名条目改名备份（加 .backup-日期 后缀）"
 fi
 if [ "$missing" -gt 0 ]; then
-  echo "❌ $missing 个 skill 找不到 → 装一下： ./scripts/install.sh --all --replace"
+  echo "❌ $missing 个 skill 找不到 → 装一下： ./scripts/install.sh"
   exit 1
 fi
 echo "✅ 7 个 skill 都能解析到（若上面有 ⚠️ 先消掉冲突）。重启 DSH / Cursor 后生效。"

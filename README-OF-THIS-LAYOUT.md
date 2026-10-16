@@ -43,28 +43,62 @@ workflowproject-kit/          ← 新仓库根 = 可直接安装的 skill
 **注意**：`kits/` 里的 27,031 行是**原样搬运**的，我**没有改**任何内容（我只读了其中 1.1%，
 没有资格改）。新加的东西全在 `kits/` **之外**：入口、8 个门禁、3 个模板、2 个脚本。
 
-## 安装（符号链接，不是拷贝）
+## 安装：**一条命令，只装一处**
 
 ```bash
-# 1) 把这个目录放到你选定的位置（它将成为 git 仓库的根）
-mv workflowproject-kit ~/Desktop/workflowproject-kit      # 或任何位置
+# 把这个目录放到你选定的位置（它同时就是 git 仓库的根）
+mv workflowproject-kit ~/Desktop/workflowproject-kit
+cd ~/Desktop/workflowproject-kit
 
-# 2) 用符号链接安装到 skill 根（零漂移：改仓库 = 改已安装的 skill）
-H="$HOME/Library/Application Support/dsh-desktop/harness/skills"
-rm -rf "$H/workflowproject-kit"
-ln -s ~/Desktop/workflowproject-kit "$H/workflowproject-kit"
-
-# 3) 6 个能力包各自注册成 skill（harness 只扫一层 skills/*/SKILL.md）
-S="$HOME/.codex/skills"
-for k in project-governance-kit team-orchestration-kit product-manager-kit ui-designer-kit developer-kit tester-kit; do
-  [ -e "$S/$k" ] || ln -s ~/Desktop/workflowproject-kit/kits/$k "$S/$k"
-done
+./scripts/install.sh --dry-run     # 先看要做什么
+./scripts/install.sh               # 真装（默认 → ~/.codex/skills）
+./scripts/verify_install.sh        # 确认 7 个 skill 都解析得到、没有同名冲突
 ```
 
-> ⚠️ `product-manager-kit` 在 `~/.codex/skills/` **已有一份独立拷贝（内容不同）**。
-> 上面第 3 步会跳过它。**你需要决定留哪份** —— 两份并存必然漂移。
-> 建议：留 `kits/product-manager-kit`（跟仓库走，可版本控制），
-> 删掉 `~/.codex/skills/product-manager-kit` 的实体、改成指向仓库的符号链接。
+### 为什么默认只装 `~/.codex/skills` 一处就够
+
+三家工具的技能根（官方文档 + 实测）：
+
+| 工具 | 原生根 | 兼容读取 |
+|---|---|---|
+| **Codex** | `~/.codex/skills/` | — |
+| **Cursor** | `~/.cursor/skills/`、`~/.agents/skills/`、项目内 `.cursor/skills/`/`.agents/skills/` | **`~/.codex/skills/`**、`~/.claude/skills/` 等 |
+| **DSH** | `$DSH_HOME/skills/` | **`~/.codex/skills/`**（实测：目录里那份就是从这里读到的） |
+
+→ **`~/.codex/skills/` 是三家共同读取的位置，一处即通吃。**
+
+> ⚠️ **不要用 `--all`**：那会把同一个 skill 装进 3 个根，而 DSH 与 Cursor **各自**都会读
+> 其中两个根 → 同一个 skill 出现两次、谁生效不确定。`--all` 只在"我确定只要某个根"时才用。
+
+### 必须处理一次：harness 里的同名旧实体目录
+
+DSH 自己的技能根里现在躺着一个**旧的 `workflowproject-kit` 实体目录**（108 行版）。
+它是 `name: workflowproject-kit`，与 `~/.codex/skills` 里新装的那个**同名**。
+
+`install.sh` 会主动警告这件事（不会覆盖你的目录）。处理方式：
+
+```bash
+H="$HOME/Library/Application Support/dsh-desktop/harness/skills"
+mv "$H/workflowproject-kit" "$H/_backup-workflowproject-kit-$(date +%Y%m%d)"   # 改名备份，不删
+./scripts/verify_install.sh                                                    # 应变成全 ✅ 无 ⚠️
+```
+
+> `product-manager-kit` 同理：`~/.codex/skills/` 里那份是**另一套打包**（wrapper 式、英文、
+> 59 文件/6,975 行），本仓库那份是**超集**（平铺、中文、64 文件/7,913 行）。
+> 旧版唯一独有的是 `agents/openai.yaml`（3 行显示元数据，无引用）。
+> 处理：`mv ~/.codex/skills/product-manager-kit{,.backup-$(date +%Y%m%d)}` 后重跑 `install.sh`。
+
+### 参数速查
+
+```bash
+./scripts/install.sh                 # 默认：~/.codex/skills（推荐，三家通用）
+./scripts/install.sh --replace       # 遇到同名实体目录时：先改名备份再换链接（默认跳过）
+./scripts/install.sh --cursor        # 额外装 ~/.cursor/skills（一般不需要）
+./scripts/install.sh --dsh           # 额外装 DSH 原生根（一般不需要）
+./scripts/install.sh --project PATH  # 装进某个项目 + 生成 AGENTS.md/.cursor 规则
+./scripts/install.sh --copy          # 用拷贝代替符号链接
+./scripts/install.sh --uninstall     # 只删本脚本建的链接，绝不删实体目录
+```
 
 ## 验证
 
