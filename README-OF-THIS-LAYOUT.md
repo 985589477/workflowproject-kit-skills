@@ -72,6 +72,9 @@ done
 # 入口行数（应为 ~110）
 wc -l SKILL.md
 
+# Cursor 插件清单是否合规（坏了 Cursor 只会静默不显示）
+python3 scripts/check_plugin_manifests.py .
+
 # 对任意项目跑门禁校验
 python3 scripts/check_gates.py /path/to/project
 python3 scripts/check_gates.py --audit /path/to/project   # 找出没证据的门禁（死规则）
@@ -79,6 +82,45 @@ python3 scripts/check_gates.py --audit /path/to/project   # 找出没证据的�
 # 引用完整性：SKILL.md 提到的路径都存在
 grep -o '](\([^)]*\.md\))' SKILL.md
 ```
+
+## 在 Cursor 里安装（三种方式，从简到繁）
+
+依据：[Agent Skills](https://cursor.com/docs/skills) · [Plugins 参考](https://cursor.com/docs/reference/plugins)
+
+**① 最简：`~/.codex/skills/`（Cursor 也读它）**
+Cursor 为兼容会加载 `~/.codex/skills/`，而 `install.sh` 默认就装在那里。
+`./scripts/install.sh` 一条命令即可，无需插件。
+
+**② 项目级：`install.sh --project <路径>`**
+生成 `.agents/skills/workflowproject-kit/` + `AGENTS.md` + `.cursor/rules/*.mdc`。
+规则文件必须是 `.mdc`（`.md` 会被 Cursor **忽略**）。
+
+**③ 从 GitHub 仓库安装（给别人用）**
+仓库已含 `.cursor-plugin/marketplace.json` + `.cursor-plugin/plugin.json`，
+符合 Cursor 的 multi-plugin 规范：
+
+```bash
+# 先在本地按官方方式试装（可选）
+mkdir -p ~/.cursor/plugins/local
+ln -s "$PWD" ~/.cursor/plugins/local/workflowproject-kit   # 或直接拷贝
+# 然后 Cursor → Customize → 确认出现 7 个插件条目
+```
+
+远程方式：Cursor → **Customize → From GitHub Repository**，填
+`https://github.com/985589477/workflowproject-kit-skills`。
+（团队用户走 Dashboard → Plugins & MCPs → Team Marketplaces → Add Marketplace。
+公开市场需提交审核：cursor.com/marketplace/publish）
+
+**为什么仓库布局天然合规**：Cursor 有一条 `Root Skill` 规则 ——
+`SKILL.md` 在插件根、且没有 `skills/` 目录时，整个包被当作**单 skill 插件**。
+本仓库正好如此（入口在根，6 个能力包在 `kits/` 而非 `skills/`），
+所以只需 2 个清单文件，**不用改任何目录结构**。
+
+> ⚠️ 诚实说明：这 2 个清单是**按官方文档 schema 写的**，并用
+> `scripts/check_plugin_manifests.py` 校验过（路径存在、kebab-case、Root Skill 不冲突）。
+> 但**我无法在这里用真实 Cursor 验证它的解析行为** —— 本机没有 Cursor。
+> 如果 Customize 里没出现条目，先跑上面那个校验脚本，再对照
+> [Plugins 参考](https://cursor.com/docs/reference/plugins.md)。
 
 ## 已做的验证（实测，不是"应该能跑"）
 
@@ -90,3 +132,32 @@ grep -o '](\([^)]*\.md\))' SKILL.md
 | `install_project.py` | ✅ `--help` 正常，`--with-kits` 生效 |
 | `SKILL.md` 行数 | ✅ **110 行**（目标 ≤120） |
 | 6 个能力包内容 | ✅ **一个字节未改**（27,031 行原样） |
+| Cursor 插件清单 | ✅ 7 个插件条目，路径存在 / kebab-case / Root Skill 不冲突 |
+| `check_plugin_manifests.py` | ✅ 两个用例：正常通过；注入 3 个破坏（坏 name / 路径不存在 / 缺 SKILL.md）→ **全部抓到，退出码 1** |
+
+## 处理那份重复的 `product-manager-kit`
+
+`~/.codex/skills/product-manager-kit`（59 文件 / 6,975 行）与本仓库的
+`kits/product-manager-kit`（64 文件 / 7,913 行）**是两份不同的打包**：
+
+| | 旧（`~/.codex/skills/`） | 新（本仓库） |
+|---|---|---|
+| 形态 | **wrapper 式**：真内容在 `references/product-manager-kit/` 下 | **直接导出**：`scorecards/` `templates/` `workflows/` 平铺 |
+| SKILL.md | 英文，写明 "based on the exported package in `references/...`" | 中文框架 |
+| 独有文件 | 只有 `agents/openai.yaml`（3 行**显示元数据**，无任何引用） | 其余**全覆盖** |
+
+**本仓库那份是超集**，且可版本控制。建议替换（`install.sh` 会**跳过**已存在的实体目录，
+所以必须手动处理一次）：
+
+```bash
+# ① 备份旧的（不要直接删）
+mv ~/.codex/skills/product-manager-kit ~/.codex/skills/_backup-product-manager-kit-$(date +%Y%m%d)
+
+# ② 换成指向仓库的符号链接
+ln -s "$PWD/kits/product-manager-kit" ~/.codex/skills/product-manager-kit
+
+# ③ 确认
+ls -la ~/.codex/skills/
+```
+
+> 上面 `$PWD` 指本仓库根目录。确认没问题后再删 `_backup-*`。

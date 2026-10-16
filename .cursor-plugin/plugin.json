@@ -1,0 +1,17 @@
+{
+  "name": "workflowproject-kit",
+  "description": "AI 协作开发治理统一入口：门禁表 + 8 个可执行门禁（基线固化 / 可运行守卫 / 文档以代码为准 / 重构流程）。适用于已有或新建代码项目。",
+  "version": "2.0.0",
+  "author": {
+    "name": "985589477"
+  },
+  "repository": "https://github.com/985589477/workflowproject-kit-skills",
+  "keywords": [
+    "workflow",
+    "governance",
+    "refactoring",
+    "baseline",
+    "gates",
+    "code-review"
+  ]
+}
