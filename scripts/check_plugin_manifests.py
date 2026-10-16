@@ -44,6 +44,7 @@ def main(argv: list[str]) -> int:
         return 2
 
     errors: list[str] = []
+    warnings: list[str] = []
     checked: list[str] = []
 
     for name in ("marketplace.json", "plugin.json"):
@@ -95,18 +96,21 @@ def main(argv: list[str]) -> int:
                 )
             nm = frontmatter_name(d)
             if nm and nm != d.name:
-                errors.append(f"{pname}: frontmatter name: {nm} ≠ 目录名 {d.name}")
+                # 只是警告，不是错误：插件条目的身份来自清单里的 name，
+                # 而 source="." 时那个目录名就是 clone 出来的名字（任意）。
+                # 实测：克隆到 /tmp/final 会让这条误报成"缺陷"。
+                warnings.append(f"{pname}: 目录名 {d.name} ≠ frontmatter name: {nm} —— 安装器按 name 走，不影响")
             checked.append(f"{pname} → {src}")
 
     # plugin.json 指向的根 skill 也要自查
-    nm = frontmatter_name(root)
-    if nm and nm != root.name:
-        print(f"  · 提示：根目录名 {root.name} ≠ name: {nm}（不影响插件，安装时按 name 走）")
-
     print(f"kit 根：{root}")
     print(f"检查了 {len(checked)} 个插件条目：")
     for c in checked:
         print(f"  ✓ {c}")
+    if warnings:
+        print(f"\n⚠️  {len(warnings)} 条提示（不影响通过）：")
+        for w in warnings:
+            print(f"  - {w}")
     if errors:
         print(f"\n❌ {len(errors)} 个问题：")
         for e in errors:
