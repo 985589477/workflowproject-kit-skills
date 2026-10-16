@@ -62,6 +62,9 @@ if [ "$DO_CODEX$DO_CURSOR$DO_DSH" = "000" ] && [ -z "$PROJECT" ]; then DO_CODEX=
 [ "$UNINSTALL" = "1" ] && DRY=0
 
 log()  { printf '%s\n' "$*"; }
+# note() 写 stderr：命令替换 $(f) 只捕获 stdout，所以函数内部的提示/报错必须走 stderr，
+# 否则提示文字会被当成函数返回值（实测踩过）。
+note() { printf '%s\n' "$*" >&2; }
 
 # 安装一个 skill 到某个 skills 根。$1=父目录 $2=源目录（含 SKILL.md）$3=目标名
 install_one() {
@@ -98,25 +101,37 @@ uninstall_one() {
 }
 
 check_frontmatter() {
-  local sk="$1/SKILL.md" dirname; dirname="$(basename "$1")"
-  [ -f "$sk" ] || { log "  ❌ $1 缺 SKILL.md"; return 1; }
-  local nm; nm="$(awk '/^name:/{print $2; exit}' "$sk")"
-  grep -q '^description:' "$sk" || { log "  ❌ $dirname 缺 description"; return 1; }
-  [ "$nm" = "$dirname" ] || { log "  ❌ $dirname 的 name 不匹配（name: $nm ≠ 目录名 $dirname）"; return 1; }
-  return 0
+  local sk="$1/SKILL.md" dir
+  dir="$(basename "$1")"
+  [ -f "$sk" ] || { note "  ❌ $1 缺 SKILL.md"; return 1; }
+  local nm
+  nm="$(awk '/^name:/{print $2; exit}' "$sk")"
+  grep -q '^description:' "$sk" || { note "  ❌ $dir 缺 description"; return 1; }
+  [ -n "$nm" ] || { note "  ❌ $dir 缺 name"; return 1; }
+  # 目录名不必等于 name：安装目标以 frontmatter 的 name 为准（clone 成什么目录名都行）。
+  [ "$nm" = "$dir" ] || note "  · 目录名 $dir ≠ name: $nm —— 按 name 安装，不影响结果"
+  printf '%s' "$nm"
 }
 
 log "kit: $KIT_ROOT"
 log "模式: $MODE$([ "$DRY" = "1" ] && echo '（dry-run）')$([ "$UNINSTALL" = "1" ] && echo '（卸载）')"
 log ""
 
-# 前置校验：name 必须等于父目录名，否则装上去也不会被识别
+# 前置校验：name / description 必须存在。
+# 安装目标名 = frontmatter 的 name，所以 clone 出来的目录叫什么名字都无所谓
+# （比如仓库叫 workflowproject-kit-skills，skill 名仍是 workflowproject-kit）。
 log "前置校验："
 FAIL=0
-check_frontmatter "$KIT_ROOT" || FAIL=1
-for k in "${SUBSKILLS[@]}"; do check_frontmatter "$KIT_ROOT/kits/$k" || FAIL=1; done
-[ "$FAIL" = "0" ] && log "  ✓ $(( ${#SUBSKILLS[@]} + 1 )) 个 skill 的 frontmatter 都合法（name = 父目录名）"
-[ "$FAIL" = "0" ] || { log ""; log "frontmatter 有问题，先修再装。"; exit 1; }
+MAIN_NAME="$(check_frontmatter "$KIT_ROOT")" || FAIL=1
+KIT_NAME="${MAIN_NAME:-$KIT_NAME}"
+for k in "${SUBSKILLS[@]}"; do check_frontmatter "$KIT_ROOT/kits/$k" >/dev/null 2>&1 || FAIL=1; done
+if [ "$FAIL" = "0" ]; then
+  log "  ✓ $(( ${#SUBSKILLS[@]} + 1 )) 个 skill 的 frontmatter 都合法；安装名以 name: 为准（= ${KIT_NAME}）"
+else
+  log ""
+  log "frontmatter 有问题，先修再装。"
+  exit 1
+fi
 log ""
 
 targets=()
