@@ -33,7 +33,9 @@ echo
 missing=0; conflicts=0; found=0
 for name in "${ALL[@]}"; do
   hits=()
-  for r in "${ROOTS[@]}"; do [ -e "$r/$name" ] && hits+=("$r/$name"); done
+  # 注意：断掉的符号链接对 -e 是 false（因为目标不存在），所以要单独用 -L 认出来，
+  # 否则仓库搬家后会被误报成"没装"，而不是"链接断了"。
+  for r in "${ROOTS[@]}"; do [ -e "$r/$name" ] || [ -L "$r/$name" ] && hits+=("$r/$name"); done
 
   if [ ${#hits[@]} -eq 0 ]; then
     printf '  ❌ %-26s 任何根里都没有 → 不会被触发\n' "$name"
@@ -45,7 +47,11 @@ for name in "${ALL[@]}"; do
   [ ${#hits[@]} -gt 1 ] && conflicts=$((conflicts+1))
 
   for h in "${hits[@]}"; do
-    kind="实体目录"; [ -L "$h" ] && kind="链接 → $(readlink "$h")"
+    kind="实体目录"
+    if [ -L "$h" ]; then
+      kind="链接 → $(readlink "$h")"
+      [ -d "$h" ] || kind="$kind  ❌ 断链（目标不存在）—— 仓库搬过家？重跑 install.sh 即可重新指向"
+    fi
     sk="$h/SKILL.md"
     if [ -r "$sk" ]; then
       lines="$(wc -l < "$sk" | tr -d ' ')"
