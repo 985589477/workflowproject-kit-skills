@@ -21,11 +21,12 @@ else DSH_ROOT="$HOME/.dsh/harness/skills"; fi
 ROOTS=("$DSH_ROOT" "$HOME/.codex/skills" "$HOME/.cursor/skills" "$HOME/.agents/skills")
 
 # 本 kit 自带的主 skill 名（从 frontmatter 读，不写死）
-MAIN_NAME="$(awk '/^name:/{print $2; exit}' "$KIT_ROOT/SKILL.md" 2>/dev/null)"
-[ -n "$MAIN_NAME" ] || { echo "❌ 读不到 $KIT_ROOT/SKILL.md 的 name" >&2; exit 2; }
+MAIN_SKILL="$KIT_ROOT/skills/workflowproject-kit"
+MAIN_NAME="$(awk '/^name:/{print $2; exit}' "$MAIN_SKILL/SKILL.md" 2>/dev/null)"
+[ -n "$MAIN_NAME" ] || { echo "❌ 读不到 $MAIN_SKILL/SKILL.md 的 name" >&2; exit 2; }
 ALL=("$MAIN_NAME" "${SUBSKILLS[@]}")
 
-echo "kit:   ${KIT_ROOT}（SKILL.md $(wc -l < "$KIT_ROOT/SKILL.md" | tr -d ' ') 行）"
+echo "kit:   ${KIT_ROOT}（SKILL.md $(wc -l < "$MAIN_SKILL/SKILL.md" | tr -d ' ') 行）"
 echo "扫描的技能根："
 for r in "${ROOTS[@]}"; do [ -d "$r" ] && echo "  ✓ $r" || echo "  · ${r}（不存在）"; done
 echo

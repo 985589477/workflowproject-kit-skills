@@ -9,7 +9,8 @@ from pathlib import Path
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
-KITS_ROOT = PACKAGE_ROOT / "kits"
+SKILLS_ROOT = PACKAGE_ROOT / "skills"
+MAIN_SKILL = "workflowproject-kit"  # 入口 skill，不是"能力包"，不随项目再拷一份
 
 
 def write_text(path: Path, content: str, force: bool, dry_run: bool, changed: list[str], skipped: list[str]) -> None:
@@ -26,8 +27,9 @@ def write_text(path: Path, content: str, force: bool, dry_run: bool, changed: li
 
 def install(args: argparse.Namespace) -> int:
     project = Path(args.project).expanduser().resolve()
-    selected = [p.name for p in sorted(KITS_ROOT.iterdir()) if p.is_dir() and not p.name.startswith(".")]
-    missing = [name for name in selected if not (KITS_ROOT / name / "SKILL.md").is_file()]
+    selected = [p.name for p in sorted(SKILLS_ROOT.iterdir())
+                if p.is_dir() and not p.name.startswith(".") and p.name != MAIN_SKILL]
+    missing = [name for name in selected if not (SKILLS_ROOT / name / "SKILL.md").is_file()]
     if missing:
         print("能力包缺少 SKILL.md：" + ", ".join(missing))
         return 2
@@ -46,7 +48,7 @@ def install(args: argparse.Namespace) -> int:
         project.mkdir(parents=True, exist_ok=True)
 
     for name in (selected if args.with_kits else []):
-        source = KITS_ROOT / name
+        source = SKILLS_ROOT / name
         destination = destination_root / name
         if destination.exists() and not args.force:
             skipped.append(f"已存在，未覆盖：{destination}")

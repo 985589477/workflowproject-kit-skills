@@ -14,6 +14,9 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 PY="${PYTHON:-python3}"
+# Windows 控制台是 GBK，Python 打印 ✅/✓ 会抛 UnicodeEncodeError —— 校验工具自己变成
+# 报错来源（实测）。这里对下面所有 python 调用统一开 UTF-8 模式。
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 fail=0
 ok()   { printf '  ✅ %s\n' "$1"; }
 bad()  { printf '  ❌ %s\n' "$1"; fail=1; }
@@ -43,11 +46,12 @@ echo "④ SKILL.md 引用完整性（提到的路径都得存在）"
 $PY - <<'PYEOF'
 import pathlib, re, sys
 N = pathlib.Path(".")
-s = (N/"SKILL.md").read_text(encoding="utf-8")
+K = N/"skills"/"workflowproject-kit"   # 入口 skill：里面的引用都相对它解析
+s = (K/"SKILL.md").read_text(encoding="utf-8")
 refs = set(re.findall(r'\]\(([^)]+\.md)\)', s))
 refs |= set(re.findall(r'`(scripts/[^`]+\.py|templates/[^`]+\.md|gates/[^`]+\.md)`', s))
 refs |= {f"gates/{m}" for m in re.findall(r'gates/(\d+-[\w-]+\.md)', s)}
-missing = sorted(r for r in refs if not (N/r).exists())
+missing = sorted(r for r in refs if not (K/r).exists())
 if missing:
     print(f"  ❌ {len(missing)} 个引用指向不存在的文件：")
     for m in missing: print(f"      {m}")
@@ -62,7 +66,7 @@ $PY - <<'PYEOF'
 import pathlib, re, sys
 N = pathlib.Path(".")
 bad = []
-dirs = [N] + sorted(d for d in (N/"kits").iterdir() if d.is_dir())
+dirs = sorted(d for d in (N/"skills").iterdir() if d.is_dir())
 for d in dirs:
     sk = d/"SKILL.md"
     if not sk.is_file():

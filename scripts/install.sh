@@ -6,7 +6,8 @@
 #   · Cursor 自动加载：.agents/skills/、.cursor/skills/、~/.agents/skills/、~/.cursor/skills/，
 #     **并且为兼容也读 .claude/skills/、.codex/skills/、~/.claude/skills/、~/.codex/skills/**
 #   · Cursor **递归**扫描 skills 根 —— 「任意深度的 SKILL.md 都会被找到」。
-#   · DSH 只扫**一层** skills/*/SKILL.md（实测：6 个嵌套能力包 frontmatter 全合法却 0 个被注册）。
+#   · DSH 只扫**一层** `<根>/*/SKILL.md`（实测：6 个能力包曾嵌在 `kits/` 下，
+#     frontmatter 全合法却 0 个被注册）——所以本仓库把它们摊平成 `skills/<kit>/`。
 #   · frontmatter 的 `name` **必须等于父目录名**。
 #
 # 结论：`~/.codex/skills/` 是 DSH、Cursor、Codex 三家**共同读取**的位置。
@@ -28,6 +29,8 @@ set -euo pipefail
 KIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KIT_NAME="$(basename "$KIT_ROOT")"
 SUBSKILLS=(project-governance-kit team-orchestration-kit product-manager-kit ui-designer-kit developer-kit tester-kit)
+MAIN_DIR="workflowproject-kit"    # 入口 skill 的目录名（= frontmatter name）
+SKILLS_ROOT="$KIT_ROOT/skills"    # 7 个 skill 都是这一层的直属子目录
 
 CODEX_ROOT="${CODEX_HOME:-$HOME/.codex}/skills"
 CURSOR_ROOT="$HOME/.cursor/skills"
@@ -75,7 +78,10 @@ install_one() {
   local dest="$root/$name"
   if [ "$MODE" = "copy" ]; then
     if [ "$DRY" = "1" ]; then log "  [dry-run] 拷贝 $dest"; return 0; fi
-    mkdir -p "$dest"; rsync -a --delete "$src/" "$dest/"
+    # 不用 rsync：Windows 的 Git Bash 里没有它；而 DSH 侧**只能**拷贝（它拒绝含符号链接的
+    # skill 来源），所以拷贝模式必须真的能用。只覆盖同名文件、不做 --delete ——
+    # 与 install_one 的"绝不 rm 用户的东西"一致。
+    mkdir -p "$dest"; cp -R "$src/." "$dest/"
     log "  ✓ 拷贝 $dest"
   else
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
@@ -134,9 +140,9 @@ log ""
 # （比如仓库叫 workflowproject-kit-skills，skill 名仍是 workflowproject-kit）。
 log "前置校验："
 FAIL=0
-MAIN_NAME="$(check_frontmatter "$KIT_ROOT")" || FAIL=1
+MAIN_NAME="$(check_frontmatter "$SKILLS_ROOT/$MAIN_DIR")" || FAIL=1
 KIT_NAME="${MAIN_NAME:-$KIT_NAME}"
-for k in "${SUBSKILLS[@]}"; do check_frontmatter "$KIT_ROOT/kits/$k" >/dev/null 2>&1 || FAIL=1; done
+for k in "${SUBSKILLS[@]}"; do check_frontmatter "$SKILLS_ROOT/$k" >/dev/null 2>&1 || FAIL=1; done
 if [ "$FAIL" = "0" ]; then
   log "  ✓ $(( ${#SUBSKILLS[@]} + 1 )) 个 skill 的 frontmatter 都合法；安装名以 name: 为准（= ${KIT_NAME}）"
 else
@@ -158,8 +164,8 @@ for root in "${targets[@]:-}"; do
     uninstall_one "$root" "$KIT_NAME"
     for k in "${SUBSKILLS[@]}"; do uninstall_one "$root" "$k"; done
   else
-    install_one "$root" "$KIT_ROOT" "$KIT_NAME"
-    for k in "${SUBSKILLS[@]}"; do install_one "$root" "$KIT_ROOT/kits/$k" "$k"; done
+    install_one "$root" "$SKILLS_ROOT/$MAIN_DIR" "$KIT_NAME"
+    for k in "${SUBSKILLS[@]}"; do install_one "$root" "$SKILLS_ROOT/$k" "$k"; done
   fi
   log ""
 done
@@ -172,7 +178,7 @@ if [ -n "$PROJECT" ]; then
     for k in "${SUBSKILLS[@]}"; do uninstall_one "$PROJECT/.agents/skills" "$k"; done
   else
     # 项目级：只装主 skill（6 个能力包通过它按需引用，不必各建一份）
-    install_one "$PROJECT/.agents/skills" "$KIT_ROOT" "$KIT_NAME"
+    install_one "$PROJECT/.agents/skills" "$SKILLS_ROOT/$MAIN_DIR" "$KIT_NAME"
     log "  · 生成项目规则（AGENTS.md + .cursor/rules/*.mdc + AI-WORKFLOW-RULES.md）"
     if [ "$DRY" = "1" ]; then
       log "  [dry-run] python3 $KIT_ROOT/scripts/install_project.py $PROJECT"

@@ -27,6 +27,11 @@ import sys
 KEBAB = re.compile(r"^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$")
 MAX_MANIFEST_BYTES = 10 * 1024 * 1024
 
+# Windows 控制台默认是 GBK，下面那些 ✅/✓ 会直接抛 UnicodeEncodeError，
+# 让"校验工具"自己变成报错来源（实测）。强制 UTF-8 输出。
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 
 def frontmatter_name(skill_dir: pathlib.Path) -> str | None:
     sk = skill_dir / "SKILL.md"

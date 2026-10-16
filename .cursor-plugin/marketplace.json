@@ -11,38 +11,38 @@
   "plugins": [
     {
       "name": "workflowproject-kit",
-      "source": ".",
+      "source": "skills/workflowproject-kit",
       "description": "AI 协作开发治理统一入口：门禁表 + 8 个可执行门禁（基线固化 / 可运行守卫 / 文档以代码为准 / 重构流程）。适用于已有或新建代码项目。",
       "version": "2.0.0"
     },
     {
       "name": "project-governance-kit",
-      "source": "kits/project-governance-kit",
+      "source": "skills/project-governance-kit",
       "description": "开发前的项目治理检查：规则、架构、模块边界、设计规范、任务、验证要求。"
     },
     {
       "name": "team-orchestration-kit",
-      "source": "kits/team-orchestration-kit",
+      "source": "skills/team-orchestration-kit",
       "description": "跨角色 AI 协作调度：生命周期路由、交接检查、互审、交付验收、badcase 反馈。"
     },
     {
       "name": "product-manager-kit",
-      "source": "kits/product-manager-kit",
+      "source": "skills/product-manager-kit",
       "description": "产品经理工作：需求分析、PRD、用户故事、验收标准、优先级、版本规划、竞品分析、复盘。"
     },
     {
       "name": "ui-designer-kit",
-      "source": "kits/ui-designer-kit",
+      "source": "skills/ui-designer-kit",
       "description": "UI 设计：设计系统审计、信息架构、组件库规划、响应式适配、无障碍与可用性评审、设计交接。"
     },
     {
       "name": "developer-kit",
-      "source": "kits/developer-kit",
+      "source": "skills/developer-kit",
       "description": "开发治理：项目理解、需求到架构、模块边界、影响分析、最小必要改动、实现、测试、评审、发布回滚、重构。"
     },
     {
       "name": "tester-kit",
-      "source": "kits/tester-kit",
+      "source": "skills/tester-kit",
       "description": "测试与验收：测试策略与计划、用例、API/集成测试、兼容性、回归范围、缺陷复现、执行报告、发布验收。"
     }
   ]
