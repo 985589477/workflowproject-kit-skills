@@ -5,6 +5,13 @@ description: Use for cross-role AI team orchestration across product manager, UI
 
 # team-orchestration-kit
 
+## Entry Gate (do not skip)
+
+Loading this kit on its own does **not** exempt the task from the entry gate. Before touching any
+code, load the `workflowproject-kit` skill and execute its §1「开跑门禁」: output the status block it
+defines and write it into the project `AGENTS.md`. Runnable gate check:
+`workflowproject-kit/scripts/check_gates.py`.
+
 Use this skill when the user asks for cross-role collaboration or when a request may span product, UI design, development, and testing. This is a dispatch capability, not a requirement to create a child agent for every request.
 
 ## Required Reading
@@ -51,6 +58,7 @@ The first mode is required for simple tasks. The second mode is required for com
 Recommended sibling folders:
 
 ```text
+workflowproject-kit/      ← 统一入口：门禁表 + 8 门禁 + check_gates.py，协作前先加载它
 product-manager-kit/
 ui-designer-kit/
 developer-kit/

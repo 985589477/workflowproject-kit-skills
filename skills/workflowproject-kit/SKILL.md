@@ -1,11 +1,15 @@
 ---
 name: workflowproject-kit
-description: 用于已有或新建代码项目的 AI 协作开发治理。覆盖基线固化、架构与模块边界、设计规范、任务规划、逐条实现与验证、大型重构改造、文档同步、收尾复盘与交接。适用于需要从规划到验证的完整治理，也适用于接手已有项目、审计现状、做大范围重构、补测试与守卫、或修「多人/多轮协作后代码堆在一起」这类结构问题。Do not use for 只回答一个孤立技术问题、纯写作或纯翻译任务。
+description: Use as the entry point（统一入口，先加载本包）for any AI-driven development governance on a new or existing code project: taking over a project, starting or planning development work, auditing a codebase, large refactors, adding tests and guards, or fixing structure left messy by multi-round collaboration. Then route to the role kits (project-governance-kit / developer-kit / tester-kit / ui-designer-kit / product-manager-kit / team-orchestration-kit) as needed. 覆盖基线固化、架构与模块边界、设计规范、任务规划、逐条实现与验证、文档同步、收尾复盘与交接。Do not use for 只回答一个孤立技术问题、纯写作或纯翻译任务。
 metadata:
   short-description: 从基线到验证的开发治理
 ---
 
 # WorkflowProject 统一开发治理能力
+
+> **入口地位**：本包是统一入口。角色能力包**即使被单独加载**，也必须回到本包执行 §1 开跑门禁
+> （6 个角色包的 `SKILL.md` 顶部都已写明这一点，实测缺过一次：任务被路由到
+> `project-governance-kit`，那 9 行状态行就没输出）。
 
 ## 0. 三条铁律（只读这三条；其余按需查）
 

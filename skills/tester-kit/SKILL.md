@@ -5,6 +5,13 @@ description: Use for testing work such as acceptance criteria review, test strat
 
 # tester-kit
 
+## Entry Gate (do not skip)
+
+Loading this kit on its own does **not** exempt the task from the entry gate. Before touching any
+code, load the `workflowproject-kit` skill and execute its §1「开跑门禁」: output the status block it
+defines and write it into the project `AGENTS.md`. Runnable gate check:
+`workflowproject-kit/scripts/check_gates.py`.
+
 Use this skill when the user asks for testing deliverables.
 
 Start by reading:

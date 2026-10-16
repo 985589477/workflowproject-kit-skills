@@ -5,6 +5,13 @@ description: Use for UI design work such as UI briefs, design system audit, page
 
 # ui-designer-kit
 
+## Entry Gate (do not skip)
+
+Loading this kit on its own does **not** exempt the task from the entry gate. Before touching any
+code, load the `workflowproject-kit` skill and execute its §1「开跑门禁」: output the status block it
+defines and write it into the project `AGENTS.md`. Runnable gate check:
+`workflowproject-kit/scripts/check_gates.py`.
+
 Use this skill when the user asks for UI design deliverables.
 
 For design specifications, first confirm the target platform, UI framework, theme or styling integration, and whether multiple platforms share one design system. Use a platform-neutral `design-tokens.json` as the source of truth, then create platform-specific mappings only after the platform is confirmed. Do not default to CSS.
