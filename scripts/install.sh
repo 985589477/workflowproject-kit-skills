@@ -15,14 +15,18 @@
 #
 # 用法：
 #   ./install.sh                 # 装到 ~/.codex/skills/（三家通用）
-#   ./install.sh --cursor        # 额外装到 ~/.cursor/skills/（Cursor 原生位置）
-#   ./install.sh --dsh           # 额外装到 DSH harness 的 skills 根
-#   ./install.sh --all           # 以上全部
+#   ./install.sh --cursor        # 只装 ~/.cursor/skills/（**替代**默认根，不是叠加）
+#   ./install.sh --dsh           # 只装 DSH harness 的 skills 根（同上）
+#   ./install.sh --all           # 三个根都装（同一个 skill 出现 3 次，谁生效不确定）
 #   ./install.sh --project PATH  # 装进某个项目（.agents/skills/ + AGENTS.md + .cursor 规则）
 #   ./install.sh --copy          # 用拷贝代替符号链接（默认符号链接，零漂移）
 #   ./install.sh --replace       # 已有同名实体目录时：先改名备份再换成链接（默认跳过）
-#   ./install.sh --uninstall     # 卸载（只删本脚本建的符号链接，绝不删实体目录）
+#   ./install.sh --uninstall     # 卸载：删链接；实体目录**只在与仓库逐字节相同时**才删
 #   ./install.sh --dry-run       # 只打印将要做什么
+#
+# 为什么 --cursor/--dsh 是"替代"而不是"叠加"：三家**都读** ~/.codex/skills，
+# 装两处 = 同一个 skill 出现两次 = 谁生效不确定。要装两个根就分两次跑
+# （例：`--copy`，再 `--dsh --copy`）。
 
 set -euo pipefail
 
@@ -56,13 +60,14 @@ while [ $# -gt 0 ]; do
     --uninstall) UNINSTALL=1 ;;
     --replace)   REPLACE=1 ;;
     --dry-run)   DRY=1 ;;
-    -h|--help)   sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help)   sed -n '2,/^set -euo pipefail/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "未知参数：$1（用 --help 看用法）" >&2; exit 2 ;;
   esac
   shift
 done
 
-# 默认：装到三家通用的 ~/.codex/skills（若显式给了某个目标，就不再默认）
+# 默认：装到三家通用的 ~/.codex/skills。显式给了某个目标（--cursor/--dsh/--all）时**只装那一处**
+# —— 因为三家都读 ~/.codex/skills，装两处会让同一个 skill 出现两次、谁生效不确定。
 if [ "$DO_CODEX$DO_CURSOR$DO_DSH" = "000" ] && [ -z "$PROJECT" ]; then DO_CODEX=1; fi
 [ "$UNINSTALL" = "1" ] && DRY=0
 
@@ -110,11 +115,21 @@ install_one() {
   fi
 }
 
+# 卸载一个 skill。$1=父目录 $2=目标名 $3=对应的仓库源目录（用于逐字节比对）
+# 安全线：链接直接删；**实体目录只有与仓库源逐字节相同才删** —— 拷贝模式下那份就是本脚本
+# 建的，删它安全；用户改过、有多余文件、或没有源可比对，一律保留并给出手动删除命令。
 uninstall_one() {
-  local root="$1" name="$2"
+  local root="$1" name="$2" src="${3:-}"
   local dest="$root/$name"   # 同上：不能和上一行合并
   if [ -L "$dest" ]; then rm -f "$dest"; log "  ✓ 已删链接 $dest"
-  elif [ -e "$dest" ]; then log "  ⚠️  保留实体目录（不删）：$dest"
+  elif [ -d "$dest" ]; then
+    if [ -n "$src" ] && [ -d "$src" ] && diff -r -q "$src" "$dest" >/dev/null 2>&1; then
+      rm -rf "$dest"; log "  ✓ 已删拷贝（与仓库逐字节相同）$dest"
+    else
+      log "  ⚠️  保留实体目录（与仓库不一致，或没有可比对的源）：$dest"
+      log "      确认不要了就手动删：rm -rf \"$dest\""
+    fi
+  elif [ -e "$dest" ]; then log "  ⚠️  保留（不是目录）：$dest"
   else log "  · 不存在：$dest"; fi
 }
 
@@ -161,8 +176,8 @@ for root in "${targets[@]:-}"; do
   [ -n "$root" ] || continue
   log "目标：$root"
   if [ "$UNINSTALL" = "1" ]; then
-    uninstall_one "$root" "$KIT_NAME"
-    for k in "${SUBSKILLS[@]}"; do uninstall_one "$root" "$k"; done
+    uninstall_one "$root" "$KIT_NAME" "$SKILLS_ROOT/$MAIN_DIR"
+    for k in "${SUBSKILLS[@]}"; do uninstall_one "$root" "$k" "$SKILLS_ROOT/$k"; done
   else
     install_one "$root" "$SKILLS_ROOT/$MAIN_DIR" "$KIT_NAME"
     for k in "${SUBSKILLS[@]}"; do install_one "$root" "$SKILLS_ROOT/$k" "$k"; done
@@ -174,8 +189,8 @@ if [ -n "$PROJECT" ]; then
   [ -d "$PROJECT" ] || { log "项目目录不存在：$PROJECT" >&2; exit 2; }
   log "项目：$PROJECT"
   if [ "$UNINSTALL" = "1" ]; then
-    uninstall_one "$PROJECT/.agents/skills" "$KIT_NAME"
-    for k in "${SUBSKILLS[@]}"; do uninstall_one "$PROJECT/.agents/skills" "$k"; done
+    uninstall_one "$PROJECT/.agents/skills" "$KIT_NAME" "$SKILLS_ROOT/$MAIN_DIR"
+    for k in "${SUBSKILLS[@]}"; do uninstall_one "$PROJECT/.agents/skills" "$k" "$SKILLS_ROOT/$k"; done
   else
     # 项目级：只装主 skill（6 个能力包通过它按需引用，不必各建一份）
     install_one "$PROJECT/.agents/skills" "$SKILLS_ROOT/$MAIN_DIR" "$KIT_NAME"

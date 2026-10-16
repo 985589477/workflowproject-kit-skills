@@ -110,11 +110,11 @@ mv "$H/workflowproject-kit" "$H/_backup-workflowproject-kit-$(date +%Y%m%d)"   #
 ```bash
 ./scripts/install.sh                 # 默认：~/.codex/skills（推荐，三家通用）
 ./scripts/install.sh --replace       # 遇到同名实体目录时：先改名备份再换链接（默认跳过）
-./scripts/install.sh --cursor        # 额外装 ~/.cursor/skills（一般不需要）
-./scripts/install.sh --dsh           # 额外装 DSH 原生根（一般不需要）
+./scripts/install.sh --cursor        # 只装 ~/.cursor/skills（**替代**默认根，不是叠加）
+./scripts/install.sh --dsh           # 只装 DSH 原生根（同上）
 ./scripts/install.sh --project PATH  # 装进某个项目 + 生成 AGENTS.md/.cursor 规则
 ./scripts/install.sh --copy          # 用拷贝代替符号链接（**装 DSH 时必加**）
-./scripts/install.sh --uninstall     # 只删本脚本建的链接，绝不删实体目录
+./scripts/install.sh --uninstall     # 卸载：删链接；实体目录只在与仓库逐字节相同时才删
 ```
 
 ## 验证
