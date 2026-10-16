@@ -19,6 +19,7 @@
 #   ./install.sh --all           # 以上全部
 #   ./install.sh --project PATH  # 装进某个项目（.agents/skills/ + AGENTS.md + .cursor 规则）
 #   ./install.sh --copy          # 用拷贝代替符号链接（默认符号链接，零漂移）
+#   ./install.sh --replace       # 已有同名实体目录时：先改名备份再换成链接（默认跳过）
 #   ./install.sh --uninstall     # 卸载（只删本脚本建的符号链接，绝不删实体目录）
 #   ./install.sh --dry-run       # 只打印将要做什么
 
@@ -40,7 +41,7 @@ else
   DSH_ROOT="$HOME/.dsh/harness/skills"
 fi
 
-DO_CODEX=0; DO_CURSOR=0; DO_DSH=0; MODE="link"; DRY=0; UNINSTALL=0; PROJECT=""
+DO_CODEX=0; DO_CURSOR=0; DO_DSH=0; MODE="link"; DRY=0; UNINSTALL=0; PROJECT=""; REPLACE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -50,6 +51,7 @@ while [ $# -gt 0 ]; do
     --project)   PROJECT="${2:-}"; shift ;;
     --copy)      MODE="copy" ;;
     --uninstall) UNINSTALL=1 ;;
+    --replace)   REPLACE=1 ;;
     --dry-run)   DRY=1 ;;
     -h|--help)   sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "未知参数：$1（用 --help 看用法）" >&2; exit 2 ;;
@@ -77,9 +79,19 @@ install_one() {
     log "  ✓ 拷贝 $dest"
   else
     if [ -e "$dest" ] && [ ! -L "$dest" ]; then
-      log "  ⚠️  跳过（已存在实体目录，不是链接）：$dest"
-      log "      要改用它，先手动移到一边或备份 —— 本脚本不覆盖实体目录。"
-      return 0
+      if [ "$REPLACE" != "1" ]; then
+        log "  ⚠️  跳过（已存在实体目录，不是链接）：$dest"
+        log "      要改用它：加 --replace（会先改名备份，绝不删除），或手动移开。"
+        return 0
+      fi
+      # --replace：改名备份（同级、带时间戳），再建链接。绝不 rm 用户的东西。
+      local bak="$dest.backup-$(date +%Y%m%d-%H%M%S)"
+      if [ "$DRY" = "1" ]; then
+        log "  [dry-run] 备份 $dest → $(basename "$bak")，然后链接到 $src"
+        return 0
+      fi
+      mv "$dest" "$bak" || { log "  ❌ 备份失败，未改动：$dest"; return 1; }
+      log "  · 已备份：$bak"
     fi
     if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then
       log "  · 已是最新：$dest"; return 0
