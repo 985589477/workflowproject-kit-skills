@@ -6,12 +6,21 @@
 # 有没有同名冲突（同名 skill 出现在多个根里时，谁生效是不确定的）。
 #
 # 用法：./scripts/verify_install.sh
-# 退出码：0 = 8 个 skill 都能在某个根里解析到；1 = 有缺失或冲突
+# 退出码：0 = skills/ 下每个技能都能在某个根里解析到；1 = 有缺失或冲突
 
 set -uo pipefail
 
 KIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SUBSKILLS=(project-governance-kit team-orchestration-kit product-manager-kit ui-designer-kit developer-kit tester-kit stock-trading-system)
+MAIN_DIR="workflowproject-kit"
+SKILLS_ROOT="$KIT_ROOT/skills"
+# 其余技能自动发现（与 install.sh 同一规则），不再维护手工清单。
+SUBSKILLS=()
+for _d in "$SKILLS_ROOT"/*/; do
+  _n="$(basename "$_d")"
+  if [ "$_n" = "$MAIN_DIR" ]; then continue; fi
+  SUBSKILLS+=("$_n")
+done
+unset _d _n
 
 if [ -n "${DSH_HOME:-}" ]; then DSH_ROOT="$DSH_HOME/skills"
 elif [ -d "$HOME/Library/Application Support/dsh-desktop/harness" ]; then
@@ -76,7 +85,7 @@ if [ "$missing" -gt 0 ]; then
   echo "❌ $missing 个 skill 找不到 → 装一下： ./scripts/install.sh"
   exit 1
 fi
-echo "✅ 8 个 skill 都能解析到（若上面有 ⚠️ 先消掉冲突）。重启 DSH / Cursor 后生效。"
+echo "✅ ${#ALL[@]} 个 skill 都能解析到（若上面有 ⚠️ 先消掉冲突）。重启 DSH / Cursor 后生效。"
 echo
 echo "触发测试：新会话里让 AI 做一件「大范围重构」或「接手已有项目」的事，"
 echo "看它是否先输出开跑门禁状态行、并去读 gates/01-baseline-freeze.md。"

@@ -49,6 +49,11 @@
       "name": "stock-trading-system",
       "source": "skills/stock-trading-system",
       "description": "A股日K级交易分析体系：市场主线确认、选股、划线、买点、主升浪持股、风控卖点（六段决策链 + 检查清单）。知识型技能，不构成投资建议。"
+    },
+    {
+      "name": "trading-signal-standard",
+      "source": "skills/trading-signal-standard",
+      "description": "交易信号落地标准：判据函数化、口径三件套（定义/量纲/边界）、推算值必须登记假设、边界用例必盖；附可直接复制的 pytest 守卫模板。"
     }
   ]
 }

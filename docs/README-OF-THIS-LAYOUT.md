@@ -1,7 +1,7 @@
 # 这个目录是什么（以及为什么它没有生成器）
 
-> 这是 workflowproject-kit 的**无生成器形态**：8 个 skill 就是 `skills/` 下的 8 个普通目录，
-> 可直接安装。它同时也是**新仓库的根** —— 用 git 跟踪它，就等于"把 skill 做了记录"。
+> 这是 workflowproject-kit 的**无生成器形态**：`skills/` 下的每个目录就是一个独立 skill，可直接安装。
+> 它同时也是**新仓库的根** —— 用 git 跟踪它，就等于"把 skill 做了记录"。
 >
 > **为什么是 `skills/<kit>/` 而不是 `kits/<kit>/`**：DSH 只扫技能根的**直属子目录**
 > （`<根>/<名字>/SKILL.md`，见 `scripts/install.sh` 头注释里的实测记录）。`kits/` 这一层
@@ -29,7 +29,7 @@
 
 ```text
 workflowproject-kit-skills/        ← 仓库根（放工具和文档，**不是**技能根）
-├── skills/                       ← 技能根：8 个 skill 都是它的直属子目录
+├── skills/                       ← 技能根：每个直属子目录是一个 skill（加目录即纳入安装）
 │   ├── workflowproject-kit/      ← 入口 skill
 │   │   ├── SKILL.md              ← 门禁表（唯一必读，110 行）
 │   │   ├── AI-WORKFLOW-RULES.md  ← 指针文件（规则本体在 SKILL.md / 项目 AGENTS.md）
@@ -42,16 +42,16 @@ workflowproject-kit-skills/        ← 仓库根（放工具和文档，**不是
 │   ├── ui-designer-kit/          （3,255）
 │   ├── developer-kit/            （10,923）
 │   ├── tester-kit/               （2,133）
-│   └── stock-trading-system/     （388 行；2026-10-18 由两份交易材料生成的知识型技能，
-│                                  6 文件 = SKILL.md + 4 章 + 速查卡）
+│   ├── stock-trading-system/     （388 行；2026-10-18 由两份交易材料生成的知识型技能）
+│   └── trading-signal-standard/  （2026-10-18 由上一行派生：交易判据落地的开发标准 + pytest 守卫模板）
 ├── scripts/                      ← 仓库工具（**不进技能包**）
 │   ├── install.sh                ← 安装到各家技能根
-│   ├── verify_install.sh         ← 校验 8 个 skill 是否都能解析到
+│   ├── verify_install.sh         ← 校验 skills/ 下每个技能是否都能解析到
 │   ├── self_check.sh             ← 仓库自检（语法 / 引用完整性 / frontmatter）
 │   ├── check_plugin_manifests.py ← Cursor 清单校验
 │   └── install_project.py        ← 往目标项目装 AGENTS.md 等（默认不拷能力包）
 ├── docs/                         ← 仓库文档（含本文件）
-└── .cursor-plugin/               ← Cursor 清单（8 个条目，source = skills/<kit>）
+└── .cursor-plugin/               ← Cursor 清单（每个技能一个条目，source = skills/<kit>）
 ```
 
 **注意**：`skills/<kit>/` 里的 27,031 行是**原样搬运**的，我**没有改**任何内容（我只读了其中 1.1%，
@@ -66,7 +66,7 @@ cd ~/Desktop/workflowproject-kit
 
 ./scripts/install.sh --dry-run     # 先看要做什么
 ./scripts/install.sh               # 真装（默认 → ~/.codex/skills）
-./scripts/verify_install.sh        # 确认 8 个 skill 都解析得到、没有同名冲突
+./scripts/verify_install.sh        # 确认每个技能都解析得到、没有同名冲突
 ```
 
 > ⚠️ **装 DSH 必须加 `--copy`**：DSH 的技能来源**不接受符号链接**
@@ -216,4 +216,4 @@ mv ~/.codex/skills/product-manager-kit ~/.codex/skills/_backup-product-manager-k
 ls -la ~/.codex/skills/
 ```
 
-> `--copy` 会把 8 个 skill 都覆盖成仓库里的版本（只覆盖同名文件，不删多余文件）。
+> `--copy` 会把 `skills/` 下的所有技能都覆盖成仓库里的版本（只覆盖同名文件，不删多余文件）。
