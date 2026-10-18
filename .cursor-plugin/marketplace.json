@@ -44,6 +44,11 @@
       "name": "tester-kit",
       "source": "skills/tester-kit",
       "description": "测试与验收：测试策略与计划、用例、API/集成测试、兼容性、回归范围、缺陷复现、执行报告、发布验收。"
+    },
+    {
+      "name": "stock-trading-system",
+      "source": "skills/stock-trading-system",
+      "description": "A股日K级交易分析体系：市场主线确认、选股、划线、买点、主升浪持股、风控卖点（六段决策链 + 检查清单）。知识型技能，不构成投资建议。"
     }
   ]
 }

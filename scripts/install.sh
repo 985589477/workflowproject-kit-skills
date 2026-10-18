@@ -32,9 +32,11 @@ set -euo pipefail
 
 KIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 KIT_NAME="$(basename "$KIT_ROOT")"
-SUBSKILLS=(project-governance-kit team-orchestration-kit product-manager-kit ui-designer-kit developer-kit tester-kit)
+# skills/ 下除入口以外的技能：安装/卸载/前置校验都按这个清单走。
+# 新增技能时在这里加一行（目前 8 个 = 入口 workflowproject-kit + 下面 7 个）。
+SUBSKILLS=(project-governance-kit team-orchestration-kit product-manager-kit ui-designer-kit developer-kit tester-kit stock-trading-system)
 MAIN_DIR="workflowproject-kit"    # 入口 skill 的目录名（= frontmatter name）
-SKILLS_ROOT="$KIT_ROOT/skills"    # 7 个 skill 都是这一层的直属子目录
+SKILLS_ROOT="$KIT_ROOT/skills"    # 8 个 skill 都是这一层的直属子目录
 
 CODEX_ROOT="${CODEX_HOME:-$HOME/.codex}/skills"
 CURSOR_ROOT="$HOME/.cursor/skills"

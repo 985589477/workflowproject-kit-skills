@@ -61,7 +61,7 @@ PYEOF
 [ $? -ne 0 ] && fail=1
 
 echo
-echo "⑤ 7 个 skill 的 frontmatter（name + description，且 name 合法）"
+echo "⑤ skills/ 下每个技能的 frontmatter（name + description，且 name 合法）"
 $PY - <<'PYEOF'
 import pathlib, re, sys
 N = pathlib.Path(".")
