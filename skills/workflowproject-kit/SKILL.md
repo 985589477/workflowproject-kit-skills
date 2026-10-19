@@ -1,6 +1,6 @@
 ---
 name: workflowproject-kit
-description: Use as the entry point（统一入口，先加载本包）for any AI-driven development governance on a new or existing code project: taking over a project, starting or planning development work, auditing a codebase, large refactors, adding tests and guards, or fixing structure left messy by multi-round collaboration. Then route to the role kits (project-governance-kit / developer-kit / tester-kit / ui-designer-kit / product-manager-kit / team-orchestration-kit) as needed. 覆盖基线固化、架构与模块边界、设计规范、任务规划、逐条实现与验证、文档同步、收尾复盘与交接。Do not use for 只回答一个孤立技术问题、纯写作或纯翻译任务。
+description: "Use as the entry point（统一入口，先加载本包）for any AI-driven development governance on a new or existing code project: taking over a project, starting or planning development work, auditing a codebase, large refactors, adding tests and guards, or fixing structure left messy by multi-round collaboration. Then route to the role kits (project-governance-kit / developer-kit / tester-kit / ui-designer-kit / product-manager-kit / team-orchestration-kit) as needed. 覆盖基线固化、架构与模块边界、设计规范、任务规划、逐条实现与验证、文档同步、收尾复盘与交接。Do not use for 只回答一个孤立技术问题、纯写作或纯翻译任务。"
 metadata:
   short-description: 从基线到验证的开发治理
 ---
