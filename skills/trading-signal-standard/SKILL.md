@@ -1,6 +1,6 @@
 ---
 name: trading-signal-standard
-description: 把交易判据（洗盘区/一字板/放量倍数/破位/二高点等）落成可验证代码的规范：判据必须函数化、口径三件套（定义/量纲/边界）必须登记、禁止未来函数（lookahead）、边界用例必盖。用于新增或修改任何交易/选股信号、给策略加参数、评审交易功能实现、或排查"回测赚钱实盘亏钱"这类口径不一致问题。Use when implementing or reviewing trading signals, screening rules, strategy parameters, backtest entry/exit logic, or when a signal's definition, units, or boundary conditions (suspension, limit-up, adjustment, new listing) are unclear. Do not use for chart pattern reading (use stock-trading-system) or generic engineering governance (use developer-kit).
+description: "把交易判据（洗盘区/一字板/放量倍数/破位/二高点等）落成可验证代码的规范：判据必须函数化、口径三件套（定义/量纲/边界）必须登记、禁止未来函数（lookahead）、边界用例必盖。用于新增或修改任何交易/选股信号、给策略加参数、评审交易功能实现、或排查「回测赚钱实盘亏钱」这类口径不一致问题。Use when implementing or reviewing trading signals, strategy parameters, or backtest entry/exit logic, or when a definition, units, or boundary (suspension, limit-up, adjustment, new listing) is unclear. Do not use for chart pattern reading (use stock-trading-system) or generic engineering governance (use developer-kit)."
 ---
 
 # 交易信号落地标准

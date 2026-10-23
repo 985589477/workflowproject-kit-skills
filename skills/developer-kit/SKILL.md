@@ -1,6 +1,6 @@
 ---
 name: developer-kit
-description: "Use for AI-assisted software development governance: project bootstrap, project understanding, requirements-to-architecture, module boundaries, issue diagnosis, data/API/state contracts, security and permission governance, change risk, impact analysis, minimal necessary change / anti-overengineering checks, implementation, testing, documentation sync, code review, architecture decision records, dependency and tech debt governance, environment config governance, release and rollback planning, workflow orchestration, and AI collaboration retrospectives. Do not use for pure product manager deliverables, UI visual design, or unrelated writing tasks."
+description: "Use for AI-assisted software development governance: project bootstrap and understanding, requirements-to-architecture, module boundaries, data/API/state contracts, security and permissions, change and impact risk, minimal necessary change (anti-overengineering), implementation, testing, documentation sync, code review, ADRs, dependency and tech debt, env config, release and rollback. Do not use for pure product-manager deliverables, UI visual design, or unrelated writing."
 ---
 
 # developer-kit
